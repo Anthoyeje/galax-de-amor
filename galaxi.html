@@ -47,7 +47,11 @@
             animation: float 3s ease-in-out infinite;
         }
         @media (max-width: 640px) {
-            #info { font-size: 18px; top: 15px; padding: 15px 30px; }
+            #info { 
+                font-size: 18px; 
+                top: 15px; 
+                padding: 15px 30px; 
+            }
             #info span {
                 font-size: 11px !important;
             }
@@ -598,8 +602,6 @@
             createFloatingHeart();
         }
         createMagicalStars();
-        window.customImages = [];
-        window.createImages();
 
         // Luces románticas
         const ambientLight = new THREE.AmbientLight(0xffe4f0, 0.6);
@@ -710,6 +712,7 @@
                 }, 500);
                 status.textContent = 'Modo por defecto';
                 status.style.color = '#ff00ff';
+                window.createImages();
             }
         }, 100);
     </script>
