@@ -469,8 +469,10 @@
             particles.push(sprite);
         }
 
+        window.customImages = []; // Inicializar globalmente
+
         function createImageParticle() {
-            if (typeof window.customImages === 'undefined' || window.customImages.length === 0) return;
+            if (window.customImages.length === 0) return;
             const canvas = document.createElement('canvas');
             canvas.width = 140;
             canvas.height = 140;
@@ -682,6 +684,7 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
       import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+      import * as THREE from 'three';
       // Your web app's Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyDo7xxzDMRJMEOEyhmZiH5Q2lOAgmZYmtk",
@@ -726,9 +729,9 @@
               const data = snapshot.val();
               if (Array.isArray(data)) {
                 const textureLoader = new THREE.TextureLoader();
-                const loadPromises = data.slice(0, 5).map(url => {
+                const loadPromises = data.slice(0, 5).map(base64Data => {
                   return new Promise((resolve) => {
-                    textureLoader.load(url, resolve, undefined, () => resolve(null));
+                    textureLoader.load(base64Data, resolve, undefined, () => resolve(null));
                   });
                 });
                 const loadedTextures = await Promise.all(loadPromises);
