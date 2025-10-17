@@ -66,6 +66,21 @@
             border: none;
             background: transparent;
         }
+        #exitFullscreenBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+            display: none;
+            padding: 8px 16px;
+            background: linear-gradient(145deg, #ff6b9d, #ffb3c6);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Dancing Script', cursive;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -85,6 +100,7 @@
     <div id="galaxiPanel">
         <iframe id="galaxiFrame" src="galaxi.html"></iframe>
     </div>
+    <button id="exitFullscreenBtn">Salir Pantalla Completa</button>
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -99,6 +115,7 @@
         const pauseBtn = document.getElementById('pauseBtn');
         const galaxiPanel = document.getElementById('galaxiPanel');
         const galaxiFrame = document.getElementById('galaxiFrame');
+        const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
         
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -714,6 +731,15 @@
             backgroundMusic.play();
             musicPrompt.style.display = 'none';
             musicControls.style.display = 'block';
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+                document.documentElement.msRequestFullscreen();
+            }
         });
 
         playNo.addEventListener('click', () => {
@@ -734,6 +760,32 @@
                 pauseBtn.textContent = 'Seguir';
             }
         });
+
+        // Lógica de pantalla completa
+        exitFullscreenBtn.addEventListener('click', () => {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) { // Firefox
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) { // Chrome, Safari, Opera
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { // IE/Edge
+                document.msExitFullscreen();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', updateFullscreenBtn);
+        document.addEventListener('mozfullscreenchange', updateFullscreenBtn);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenBtn);
+        document.addEventListener('MSFullscreenChange', updateFullscreenBtn);
+
+        function updateFullscreenBtn() {
+            if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                exitFullscreenBtn.style.display = 'block';
+            } else {
+                exitFullscreenBtn.style.display = 'none';
+            }
+        }
 
         animate();
     </script>
