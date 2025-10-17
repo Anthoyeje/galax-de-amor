@@ -96,6 +96,28 @@
             font-family: 'Share Tech Mono', monospace;
             border: 1px solid #00ffcc;
         }
+        #imagePanel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, rgba(255, 20, 147, 0.3), rgba(138, 43, 226, 0.3));
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 182, 193, 0.4);
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+            max-width: 500px;
+            overflow-x: auto;
+        }
+        #imagePanel img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -473,15 +495,8 @@
 
         function createImageParticle() {
             if (window.customImages.length === 0) return;
-            const canvas = document.createElement('canvas');
-            canvas.width = 140;
-            canvas.height = 140;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.fillRect(0, 0, 140, 140);
-            const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({
-                map: texture,
+                map: null,
                 transparent: true,
                 opacity: 1.0,
                 blending: THREE.AdditiveBlending
@@ -721,22 +736,31 @@
       // Verificar y cargar datos
       async function loadData() {
         let hasData = false;
+        let rawData = [];
         window.customImages = [];
         if (id) {
           try {
             const snapshot = await get(ref(database, `images/${id}`));
             if (snapshot.exists()) {
-              const data = snapshot.val();
-              if (Array.isArray(data)) {
+              rawData = snapshot.val();
+              if (Array.isArray(rawData)) {
                 const textureLoader = new THREE.TextureLoader();
-                const loadPromises = data.slice(0, 5).map(base64Data => {
+                const loadPromises = rawData.slice(0, 5).map(base64Data => {
                   return new Promise((resolve) => {
                     textureLoader.load(base64Data, resolve, undefined, () => resolve(null));
                   });
                 });
                 const loadedTextures = await Promise.all(loadPromises);
-                window.customImages = loadedTextures.filter(tex => tex !== null);
-                hasData = window.customImages.length > 0;
+                let customTextures = loadedTextures.filter(tex => tex !== null);
+                if (customTextures.length > 0) {
+                  // Duplicar hasta al menos 10
+                  while (customTextures.length < 10) {
+                    customTextures = [...customTextures, ...customTextures];
+                  }
+                  customTextures = customTextures.slice(0, 10);
+                  window.customImages = customTextures;
+                  hasData = true;
+                }
               }
             }
           } catch (error) {
@@ -760,6 +784,17 @@
               status.textContent = 'Datos cargados 💖';
               status.style.color = '#00ff00';
               window.createImages();
+
+              // Mostrar panel con las 5 imágenes originales (o menos, repetidas si <5)
+              const panel = document.createElement('div');
+              panel.id = 'imagePanel';
+              document.body.appendChild(panel);
+              rawData.slice(0, 5).forEach(base64 => {
+                const img = document.createElement('img');
+                img.src = base64;
+                panel.appendChild(img);
+              });
+
             } else {
               status.textContent = 'Modo por defecto';
               status.style.color = '#ff00ff';
