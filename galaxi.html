@@ -47,16 +47,7 @@
             animation: float 3s ease-in-out infinite;
         }
         @media (max-width: 640px) {
-            #info { 
-                font-size: 18px; 
-                top: 15px; 
-                padding: 15px 30px; 
-            }
-            #info span {
-                font-size: 11px !important;
-            }
-            .progress-bar { width: 250px; }
-            #status { font-size: 10px; padding: 6px; }
+            #info { font-size: 18px; top: 15px; padding: 15px 30px; }
         }
         /* Estilos para la carga */
         #loading {
@@ -138,20 +129,20 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 
         // Configuración de la singularidad cyberpunk (fondo)
-        const BLACK_HOLE_RADIUS = isMobile ? 0.65 : 1.3;
+        const BLACK_HOLE_RADIUS = isMobile ? 1.0 : 1.3;
         const DISK_INNER_RADIUS = BLACK_HOLE_RADIUS + 0.2;
-        const DISK_OUTER_RADIUS = isMobile ? 4.0 : 8.0;
+        const DISK_OUTER_RADIUS = 8.0;
         const DISK_TILT_ANGLE = Math.PI / 3.0;
 
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x020104, 0.035);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 4000);
-        camera.position.set(isMobile ? -12 : -6.5, isMobile ? 8 : 5.0, isMobile ? 12 : 6.5);
+        camera.position.set(-6.5, 5.0, 6.5);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance" });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(isMobile ? 1 : 1.5);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
@@ -162,7 +153,7 @@
 
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
-            isMobile ? 0.4 : 0.6, 0.7, 0.2
+            0.6, 0.7, 0.2
         );
         composer.addPass(bloomPass);
 
@@ -204,18 +195,18 @@
         controls.enableDamping = true; controls.dampingFactor = 0.035;
         controls.rotateSpeed = 0.4; controls.autoRotate = false;
         controls.autoRotateSpeed = 0.1; controls.target.set(0, 0, 0);
-        controls.minDistance = isMobile ? 1.25 : 2.5; controls.maxDistance = isMobile ? 50 : 100;
+        controls.minDistance = 2.5; controls.maxDistance = 100;
         controls.enablePan = false;
         controls.update();
 
         // Elementos de la galaxia cyberpunk (fondo)
         const starGeometry = new THREE.BufferGeometry();
-        const starCount = isMobile ? 80000 : 150000;
+        const starCount = 150000;
         const starPositions = new Float32Array(starCount * 3);
         const starColors = new Float32Array(starCount * 3);
         const starSizes = new Float32Array(starCount);
         const starTwinkle = new Float32Array(starCount);
-        const starFieldRadius = isMobile ? 1000 : 2000;
+        const starFieldRadius = 2000;
         const starPalette = [
             new THREE.Color(0x00ffff), new THREE.Color(0xff00ff),
             new THREE.Color(0x8A2BE2), new THREE.Color(0x00ff7f),
@@ -225,7 +216,7 @@
             const i3 = i * 3;
             const phi = Math.acos(-1 + (2 * i) / starCount);
             const theta = Math.sqrt(starCount * Math.PI) * phi;
-            const radius = Math.cbrt(Math.random()) * starFieldRadius + 50;
+            const radius = Math.cbrt(Math.random()) * starFieldRadius + 100;
             starPositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
             starPositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
             starPositions[i3 + 2] = radius * Math.cos(phi);
@@ -385,7 +376,7 @@
         accretionDisk.renderOrder = 1;
         scene.add(accretionDisk);
 
-        const gridHelper = new THREE.GridHelper(isMobile ? 50 : 100, 50, 0x00ffff, 0x00ffff);
+        const gridHelper = new THREE.GridHelper(100, 50, 0x00ffff, 0x00ffff);
         gridHelper.material.opacity = 0.1;
         gridHelper.material.transparent = true;
         gridHelper.material.blending = THREE.AdditiveBlending;
@@ -409,34 +400,33 @@
                                 0xda70d6, 0xee82ee, 0xdda0dd, 0xf0e68c, 0xffd700];
 
         function createRomanticParticle() {
-            const size = isMobile ? 100 : 140;
             const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
+            canvas.width = 140;
+            canvas.height = 140;
             const ctx = canvas.getContext('2d');
             const isEmoji = Math.random() > 0.4;
            
             if (isEmoji) {
-                ctx.shadowBlur = isMobile ? 20 : 30;
+                ctx.shadowBlur = 30;
                 ctx.shadowColor = 'rgba(255, 105, 180, 1.0)';
-                ctx.font = `bold ${isMobile ? 70 : 100}px Arial`;
+                ctx.font = 'bold 100px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(romanticEmojis[Math.floor(Math.random() * romanticEmojis.length)], size / 2, size / 2);
+                ctx.fillText(romanticEmojis[Math.floor(Math.random() * romanticEmojis.length)], 70, 70);
             } else {
-                ctx.shadowBlur = isMobile ? 15 : 25;
+                ctx.shadowBlur = 25;
                 ctx.shadowColor = 'rgba(255, 182, 193, 1.0)';
                
-                const gradient = ctx.createLinearGradient(0, 0, size, size);
+                const gradient = ctx.createLinearGradient(0, 0, 140, 140);
                 gradient.addColorStop(0, '#' + romanticColors[Math.floor(Math.random() * romanticColors.length)].toString(16).padStart(6, '0'));
                 gradient.addColorStop(1, '#' + romanticColors[Math.floor(Math.random() * romanticColors.length)].toString(16).padStart(6, '0'));
                 ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, size, size);
+                ctx.fillRect(0, 0, 140, 140);
                
                 ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = isMobile ? 15 : 25;
+                ctx.shadowBlur = 15;
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-                ctx.font = `italic bold ${isMobile ? 18 : 28}px Georgia, serif`;
+                ctx.font = 'italic bold 28px Georgia, serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                
@@ -444,19 +434,19 @@
                 const words = phrase.split(' ');
                
                 if (words.length > 2) {
-                    ctx.fillText(words[0] + ' ' + words[1], size / 2, size * 0.43);
-                    ctx.fillText(words.slice(2).join(' '), size / 2, size * 0.64);
+                    ctx.fillText(words[0] + ' ' + words[1], 70, 60);
+                    ctx.fillText(words.slice(2).join(' '), 70, 90);
                 } else if (words.length === 2) {
-                    ctx.fillText(words[0], size / 2, size * 0.43);
-                    ctx.fillText(words[1], size / 2, size * 0.64);
+                    ctx.fillText(words[0], 70, 60);
+                    ctx.fillText(words[1], 70, 90);
                 } else {
-                    ctx.font = `italic bold ${isMobile ? 22 : 34}px Georgia, serif`;
-                    ctx.fillText(phrase, size / 2, size / 2);
+                    ctx.font = 'italic bold 34px Georgia, serif';
+                    ctx.fillText(phrase, 70, 70);
                 }
                
-                ctx.font = `${isMobile ? 18 : 25}px Arial`;
+                ctx.font = '25px Arial';
                 ctx.shadowBlur = 8;
-                ctx.fillText('💕', size / 2, size * 0.82);
+                ctx.fillText('💕', 70, 115);
             }
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({
@@ -466,11 +456,10 @@
                 blending: THREE.AdditiveBlending
             });
             const sprite = new THREE.Sprite(material);
-            const posScale = isMobile ? 0.7 : 1.0;
-            sprite.position.x = (Math.random() * 120 - 60) * posScale;
-            sprite.position.y = (Math.random() * 100 + 80) * posScale;
-            sprite.position.z = (Math.random() * 120 - 60) * posScale;
-            const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
+            sprite.position.x = Math.random() * 120 - 60;
+            sprite.position.y = Math.random() * 100 + 80;
+            sprite.position.z = Math.random() * 120 - 60;
+            const scale = Math.random() * 8 + 6;
             sprite.scale.set(scale, scale, 1);
             sprite.userData = {
                 velocity: Math.random() * 0.05 + 0.02,
@@ -484,13 +473,12 @@
 
         function createImageParticle() {
             if (typeof window.customImages === 'undefined' || window.customImages.length === 0) return;
-            const size = isMobile ? 100 : 140;
             const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
+            canvas.width = 140;
+            canvas.height = 140;
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.fillRect(0, 0, size, size);
+            ctx.fillRect(0, 0, 140, 140);
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({
                 map: texture,
@@ -499,11 +487,10 @@
                 blending: THREE.AdditiveBlending
             });
             const sprite = new THREE.Sprite(material);
-            const posScale = isMobile ? 0.7 : 1.0;
-            sprite.position.x = (Math.random() * 120 - 60) * posScale;
-            sprite.position.y = (Math.random() * 100 + 80) * posScale;
-            sprite.position.z = (Math.random() * 120 - 60) * posScale;
-            const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
+            sprite.position.x = Math.random() * 120 - 60;
+            sprite.position.y = Math.random() * 100 + 80;
+            sprite.position.z = Math.random() * 120 - 60;
+            const scale = Math.random() * 8 + 6;
             sprite.scale.set(scale, scale, 1);
             sprite.userData = {
                 velocity: Math.random() * 0.05 + 0.02,
@@ -519,24 +506,22 @@
         }
 
         window.createImages = function() {
-            const imageCount = isMobile ? 5 : 10;
-            for (let i = 0; i < imageCount; i++) {
+            for (let i = 0; i < 10; i++) {
                 createImageParticle();
             }
         };
 
         function createFloatingHeart() {
-            const size = isMobile ? 70 : 100;
             const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
+            canvas.width = 100;
+            canvas.height = 100;
             const ctx = canvas.getContext('2d');
-            ctx.shadowBlur = isMobile ? 20 : 35;
+            ctx.shadowBlur = 35;
             ctx.shadowColor = 'rgba(255, 20, 147, 1)';
-            ctx.font = `bold ${isMobile ? 55 : 80}px Arial`;
+            ctx.font = 'bold 80px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('💖', size / 2, size / 2);
+            ctx.fillText('💖', 50, 50);
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({
                 map: texture,
@@ -545,13 +530,12 @@
                 blending: THREE.AdditiveBlending
             });
             const sprite = new THREE.Sprite(material);
-            const posScale = isMobile ? 0.7 : 1.0;
             const angle = Math.random() * Math.PI * 2;
-            const radius = (40 + Math.random() * 20) * posScale;
+            const radius = 40 + Math.random() * 20;
             sprite.position.x = Math.cos(angle) * radius;
-            sprite.position.y = (Math.random() * 40 - 20) * posScale;
+            sprite.position.y = Math.random() * 40 - 20;
             sprite.position.z = Math.sin(angle) * radius;
-            const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
+            const scale = Math.random() * 8 + 6;
             sprite.scale.set(scale, scale, 1);
             sprite.userData = {
                 angle: angle,
@@ -565,16 +549,14 @@
         }
 
         function createMagicalStars() {
-            const starCount = isMobile ? 1500 : 3000;
             const geometry = new THREE.BufferGeometry();
             const vertices = [];
             const colors = [];
-            const posScale = isMobile ? 0.7 : 1.0;
-            for (let i = 0; i < starCount; i++) {
+            for (let i = 0; i < 3000; i++) {
                 vertices.push(
-                    (Math.random() * 500 - 250) * posScale,
-                    (Math.random() * 500 - 250) * posScale,
-                    (Math.random() * 500 - 250) * posScale
+                    Math.random() * 500 - 250,
+                    Math.random() * 500 - 250,
+                    Math.random() * 500 - 250
                 );
                
                 const color = new THREE.Color();
@@ -585,7 +567,7 @@
             geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
            
             const material = new THREE.PointsMaterial({
-                size: isMobile ? 1.5 : 2.0,
+                size: 2.0,
                 transparent: true,
                 opacity: 1.0,
                 vertexColors: true,
@@ -597,12 +579,10 @@
         }
 
         // Crear elementos románticos
-        const particleCount = isMobile ? 200 : 400;
-        const heartCount = isMobile ? 25 : 50;
-        for (let i = 0; i < particleCount; i++) {
+        for (let i = 0; i < 400; i++) {
             createRomanticParticle();
         }
-        for (let i = 0; i < heartCount; i++) {
+        for (let i = 0; i < 50; i++) {
             createFloatingHeart();
         }
         createMagicalStars();
@@ -610,14 +590,14 @@
         // Luces románticas
         const ambientLight = new THREE.AmbientLight(0xffe4f0, 0.6);
         scene.add(ambientLight);
-        const pointLight1 = new THREE.PointLight(0xff1493, 3, isMobile ? 50 : 100);
-        pointLight1.position.set(isMobile ? 15 : 30, isMobile ? 15 : 30, isMobile ? 15 : 30);
+        const pointLight1 = new THREE.PointLight(0xff1493, 3, 100);
+        pointLight1.position.set(30, 30, 30);
         scene.add(pointLight1);
-        const pointLight2 = new THREE.PointLight(0xda70d6, 3, isMobile ? 50 : 100);
-        pointLight2.position.set(isMobile ? -15 : -30, isMobile ? 10 : 20, isMobile ? -15 : -30);
+        const pointLight2 = new THREE.PointLight(0xda70d6, 3, 100);
+        pointLight2.position.set(-30, 20, -30);
         scene.add(pointLight2);
-        const pointLight3 = new THREE.PointLight(0xffc0cb, 2.5, isMobile ? 40 : 80);
-        pointLight3.position.set(0, isMobile ? 20 : 40, isMobile ? 10 : 20);
+        const pointLight3 = new THREE.PointLight(0xffc0cb, 2.5, 80);
+        pointLight3.position.set(0, 40, 20);
         scene.add(pointLight3);
 
         // Eventos
@@ -629,7 +609,7 @@
             composer.setSize(window.innerWidth, window.innerHeight);
             bloomPass.resolution.set(window.innerWidth, window.innerHeight);
             lensingPass.uniforms.aspectRatio.value = window.innerWidth / window.innerHeight;
-            renderer.setPixelRatio(isMobile ? 1 : 1.5);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         });
 
         const clock = new THREE.Clock();
@@ -658,18 +638,17 @@
             accretionDisk.rotation.z += deltaTime * 0.005;
 
             // Animaciones románticas
-            const posScale = isMobile ? 0.7 : 1.0;
             particles.forEach(particle => {
                 particle.position.y -= particle.userData.velocity;
                 particle.rotation.z += particle.userData.rotationSpeed;
                
                 particle.userData.swing += particle.userData.swingSpeed;
-                particle.position.x += Math.sin(particle.userData.swing) * 0.12 * posScale;
-                particle.position.z += Math.cos(particle.userData.swing * 0.7) * 0.08 * posScale;
-                if (particle.position.y < -80 * posScale) {
-                    particle.position.y = 150 * posScale;
-                    particle.position.x = (Math.random() * 120 - 60) * posScale;
-                    particle.position.z = (Math.random() * 120 - 60) * posScale;
+                particle.position.x += Math.sin(particle.userData.swing) * 0.12;
+                particle.position.z += Math.cos(particle.userData.swing * 0.7) * 0.08;
+                if (particle.position.y < -80) {
+                    particle.position.y = 150;
+                    particle.position.x = Math.random() * 120 - 60;
+                    particle.position.z = Math.random() * 120 - 60;
                 }
             });
             imageParticles.forEach(particle => {
@@ -677,12 +656,12 @@
                 particle.rotation.z += particle.userData.rotationSpeed;
                
                 particle.userData.swing += particle.userData.swingSpeed;
-                particle.position.x += Math.sin(particle.userData.swing) * 0.12 * posScale;
-                particle.position.z += Math.cos(particle.userData.swing * 0.7) * 0.08 * posScale;
-                if (particle.position.y < -80 * posScale) {
-                    particle.position.y = 150 * posScale;
-                    particle.position.x = (Math.random() * 120 - 60) * posScale;
-                    particle.position.z = (Math.random() * 120 - 60) * posScale;
+                particle.position.x += Math.sin(particle.userData.swing) * 0.12;
+                particle.position.z += Math.cos(particle.userData.swing * 0.7) * 0.08;
+                if (particle.position.y < -80) {
+                    particle.position.y = 150;
+                    particle.position.x = Math.random() * 120 - 60;
+                    particle.position.z = Math.random() * 120 - 60;
                 }
             });
             hearts.forEach(heart => {
@@ -691,7 +670,7 @@
                 heart.position.z = Math.sin(heart.userData.angle) * heart.userData.radius;
                
                 heart.userData.floatOffset += heart.userData.floatSpeed;
-                heart.position.y += Math.sin(heart.userData.floatOffset) * 0.15 * posScale;
+                heart.position.y += Math.sin(heart.userData.floatOffset) * 0.15;
                
                 heart.rotation.z = Math.sin(time + heart.userData.floatOffset) * 0.15;
             });
@@ -699,27 +678,96 @@
             composer.render(deltaTime);
         }
         animate();
+    </script>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+      import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDo7xxzDMRJMEOEyhmZiH5Q2lOAgmZYmtk",
+        authDomain: "galaxia-de-amor-cb375.firebaseapp.com",
+        databaseURL: "https://galaxia-de-amor-cb375-default-rtdb.firebaseio.com",
+        projectId: "galaxia-de-amor-cb375",
+        storageBucket: "galaxia-de-amor-cb375.firebasestorage.app",
+        messagingSenderId: "873666572167",
+        appId: "1:873666572167:web:0047a0d273d2757cb8ad22",
+        measurementId: "G-WPWG15Y4D6"
+      };
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const database = getDatabase(app);
 
-        // Simular carga simple sin base de datos
-        const loading = document.getElementById('loading');
-        const progress = document.getElementById('progress');
-        const status = document.getElementById('status');
-        let progressValue = 0;
-        const progressInterval = setInterval(() => {
-            progressValue += Math.random() * 10;
-            if (progressValue > 100) progressValue = 100;
-            progress.style.width = progressValue + '%';
-            if (progressValue >= 100) {
-                clearInterval(progressInterval);
-                loading.classList.add('hidden');
-                setTimeout(() => {
-                    loading.style.display = 'none';
-                }, 500);
-                status.textContent = 'Modo por defecto';
-                status.style.color = '#ff00ff';
-                window.createImages();
+      // Elementos DOM
+      const loading = document.getElementById('loading');
+      const progress = document.getElementById('progress');
+      const status = document.getElementById('status');
+
+      // Obtener ID de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+
+      // Simular progreso de carga
+      let progressValue = 0;
+      const progressInterval = setInterval(() => {
+        progressValue += Math.random() * 10;
+        if (progressValue > 80) progressValue = 80;
+        progress.style.width = progressValue + '%';
+      }, 100);
+
+      // Verificar y cargar datos
+      async function loadData() {
+        let hasData = false;
+        window.customImages = [];
+        if (id) {
+          try {
+            const snapshot = await get(ref(database, `images/${id}`));
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              if (Array.isArray(data)) {
+                const textureLoader = new THREE.TextureLoader();
+                const loadPromises = data.slice(0, 5).map(url => {
+                  return new Promise((resolve) => {
+                    textureLoader.load(url, resolve, undefined, () => resolve(null));
+                  });
+                });
+                const loadedTextures = await Promise.all(loadPromises);
+                window.customImages = loadedTextures.filter(tex => tex !== null);
+                hasData = window.customImages.length > 0;
+              }
             }
-        }, 100);
+          } catch (error) {
+            console.error('Error loading data:', error);
+          }
+        }
+
+        clearInterval(progressInterval);
+        // Completar progreso
+        const finalInterval = setInterval(() => {
+          progressValue += 5;
+          progress.style.width = progressValue + '%';
+          if (progressValue >= 100) {
+            clearInterval(finalInterval);
+            loading.classList.add('hidden');
+            setTimeout(() => {
+              loading.style.display = 'none';
+            }, 500);
+
+            if (hasData) {
+              status.textContent = 'Datos cargados 💖';
+              status.style.color = '#00ff00';
+              window.createImages();
+            } else {
+              status.textContent = 'Modo por defecto';
+              status.style.color = '#ff00ff';
+            }
+          }
+        }, 50);
+      }
+
+      loadData();
     </script>
 </body>
 </html>
