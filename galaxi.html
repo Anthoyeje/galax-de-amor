@@ -48,6 +48,11 @@
         }
         @media (max-width: 640px) {
             #info { font-size: 18px; top: 15px; padding: 15px 30px; }
+            #info span {
+                font-size: 11px !important;
+            }
+            .progress-bar { width: 250px; }
+            #status { font-size: 10px; padding: 6px; }
         }
         /* Estilos para la carga */
         #loading {
@@ -96,28 +101,6 @@
             font-family: 'Share Tech Mono', monospace;
             border: 1px solid #00ffcc;
         }
-        #imagePanel {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, rgba(255, 20, 147, 0.3), rgba(138, 43, 226, 0.3));
-            padding: 15px;
-            border-radius: 15px;
-            border: 2px solid rgba(255, 182, 193, 0.4);
-            backdrop-filter: blur(10px);
-            display: flex;
-            gap: 10px;
-            z-index: 100;
-            max-width: 500px;
-            overflow-x: auto;
-        }
-        #imagePanel img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
-        }
     </style>
 </head>
 <body>
@@ -148,6 +131,8 @@
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
         // Configuración de la singularidad cyberpunk (fondo)
         const BLACK_HOLE_RADIUS = 1.3;
         const DISK_INNER_RADIUS = BLACK_HOLE_RADIUS + 0.2;
@@ -158,11 +143,11 @@
         scene.fog = new THREE.FogExp2(0x020104, 0.035);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 4000);
-        camera.position.set(-6.5, 5.0, 6.5);
+        camera.position.set(isMobile ? -12 : -6.5, isMobile ? 8 : 5.0, isMobile ? 12 : 6.5);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        renderer.setPixelRatio(isMobile ? 1 : 1.5);
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
@@ -173,7 +158,7 @@
 
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
-            0.6, 0.7, 0.2
+            isMobile ? 0.4 : 0.6, 0.7, 0.2
         );
         composer.addPass(bloomPass);
 
@@ -221,7 +206,7 @@
 
         // Elementos de la galaxia cyberpunk (fondo)
         const starGeometry = new THREE.BufferGeometry();
-        const starCount = 150000;
+        const starCount = isMobile ? 80000 : 150000;
         const starPositions = new Float32Array(starCount * 3);
         const starColors = new Float32Array(starCount * 3);
         const starSizes = new Float32Array(starCount);
@@ -420,33 +405,34 @@
                                 0xda70d6, 0xee82ee, 0xdda0dd, 0xf0e68c, 0xffd700];
 
         function createRomanticParticle() {
+            const size = isMobile ? 100 : 140;
             const canvas = document.createElement('canvas');
-            canvas.width = 140;
-            canvas.height = 140;
+            canvas.width = size;
+            canvas.height = size;
             const ctx = canvas.getContext('2d');
             const isEmoji = Math.random() > 0.4;
            
             if (isEmoji) {
-                ctx.shadowBlur = 30;
+                ctx.shadowBlur = isMobile ? 20 : 30;
                 ctx.shadowColor = 'rgba(255, 105, 180, 1.0)';
-                ctx.font = 'bold 100px Arial';
+                ctx.font = `bold ${isMobile ? 70 : 100}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(romanticEmojis[Math.floor(Math.random() * romanticEmojis.length)], 70, 70);
+                ctx.fillText(romanticEmojis[Math.floor(Math.random() * romanticEmojis.length)], size / 2, size / 2);
             } else {
-                ctx.shadowBlur = 25;
+                ctx.shadowBlur = isMobile ? 15 : 25;
                 ctx.shadowColor = 'rgba(255, 182, 193, 1.0)';
                
-                const gradient = ctx.createLinearGradient(0, 0, 140, 140);
+                const gradient = ctx.createLinearGradient(0, 0, size, size);
                 gradient.addColorStop(0, '#' + romanticColors[Math.floor(Math.random() * romanticColors.length)].toString(16).padStart(6, '0'));
                 gradient.addColorStop(1, '#' + romanticColors[Math.floor(Math.random() * romanticColors.length)].toString(16).padStart(6, '0'));
                 ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, 140, 140);
+                ctx.fillRect(0, 0, size, size);
                
                 ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = isMobile ? 15 : 25;
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-                ctx.font = 'italic bold 28px Georgia, serif';
+                ctx.font = `italic bold ${isMobile ? 18 : 28}px Georgia, serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                
@@ -454,19 +440,19 @@
                 const words = phrase.split(' ');
                
                 if (words.length > 2) {
-                    ctx.fillText(words[0] + ' ' + words[1], 70, 60);
-                    ctx.fillText(words.slice(2).join(' '), 70, 90);
+                    ctx.fillText(words[0] + ' ' + words[1], size / 2, size * 0.43);
+                    ctx.fillText(words.slice(2).join(' '), size / 2, size * 0.64);
                 } else if (words.length === 2) {
-                    ctx.fillText(words[0], 70, 60);
-                    ctx.fillText(words[1], 70, 90);
+                    ctx.fillText(words[0], size / 2, size * 0.43);
+                    ctx.fillText(words[1], size / 2, size * 0.64);
                 } else {
-                    ctx.font = 'italic bold 34px Georgia, serif';
-                    ctx.fillText(phrase, 70, 70);
+                    ctx.font = `italic bold ${isMobile ? 22 : 34}px Georgia, serif`;
+                    ctx.fillText(phrase, size / 2, size / 2);
                 }
                
-                ctx.font = '25px Arial';
+                ctx.font = `${isMobile ? 18 : 25}px Arial`;
                 ctx.shadowBlur = 8;
-                ctx.fillText('💕', 70, 115);
+                ctx.fillText('💕', size / 2, size * 0.82);
             }
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({
@@ -479,7 +465,7 @@
             sprite.position.x = Math.random() * 120 - 60;
             sprite.position.y = Math.random() * 100 + 80;
             sprite.position.z = Math.random() * 120 - 60;
-            const scale = Math.random() * 8 + 6;
+            const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
             sprite.scale.set(scale, scale, 1);
             sprite.userData = {
                 velocity: Math.random() * 0.05 + 0.02,
@@ -491,12 +477,18 @@
             particles.push(sprite);
         }
 
-        window.customImages = []; // Inicializar globalmente
-
         function createImageParticle() {
-            if (window.customImages.length === 0) return;
+            if (typeof window.customImages === 'undefined' || window.customImages.length === 0) return;
+            const size = isMobile ? 100 : 140;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(0, 0, size, size);
+            const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({
-                map: null,
+                map: texture,
                 transparent: true,
                 opacity: 1.0,
                 blending: THREE.AdditiveBlending
@@ -505,7 +497,7 @@
             sprite.position.x = Math.random() * 120 - 60;
             sprite.position.y = Math.random() * 100 + 80;
             sprite.position.z = Math.random() * 120 - 60;
-            const scale = Math.random() * 8 + 6;
+            const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
             sprite.scale.set(scale, scale, 1);
             sprite.userData = {
                 velocity: Math.random() * 0.05 + 0.02,
@@ -521,22 +513,24 @@
         }
 
         window.createImages = function() {
-            for (let i = 0; i < 10; i++) {
+            const imageCount = isMobile ? 5 : 10;
+            for (let i = 0; i < imageCount; i++) {
                 createImageParticle();
             }
         };
 
         function createFloatingHeart() {
+            const size = isMobile ? 70 : 100;
             const canvas = document.createElement('canvas');
-            canvas.width = 100;
-            canvas.height = 100;
+            canvas.width = size;
+            canvas.height = size;
             const ctx = canvas.getContext('2d');
-            ctx.shadowBlur = 35;
+            ctx.shadowBlur = isMobile ? 20 : 35;
             ctx.shadowColor = 'rgba(255, 20, 147, 1)';
-            ctx.font = 'bold 80px Arial';
+            ctx.font = `bold ${isMobile ? 55 : 80}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('💖', 50, 50);
+            ctx.fillText('💖', size / 2, size / 2);
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({
                 map: texture,
@@ -550,7 +544,7 @@
             sprite.position.x = Math.cos(angle) * radius;
             sprite.position.y = Math.random() * 40 - 20;
             sprite.position.z = Math.sin(angle) * radius;
-            const scale = Math.random() * 8 + 6;
+            const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
             sprite.scale.set(scale, scale, 1);
             sprite.userData = {
                 angle: angle,
@@ -564,10 +558,11 @@
         }
 
         function createMagicalStars() {
+            const starCount = isMobile ? 1500 : 3000;
             const geometry = new THREE.BufferGeometry();
             const vertices = [];
             const colors = [];
-            for (let i = 0; i < 3000; i++) {
+            for (let i = 0; i < starCount; i++) {
                 vertices.push(
                     Math.random() * 500 - 250,
                     Math.random() * 500 - 250,
@@ -582,7 +577,7 @@
             geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
            
             const material = new THREE.PointsMaterial({
-                size: 2.0,
+                size: isMobile ? 1.5 : 2.0,
                 transparent: true,
                 opacity: 1.0,
                 vertexColors: true,
@@ -594,13 +589,17 @@
         }
 
         // Crear elementos románticos
-        for (let i = 0; i < 400; i++) {
+        const particleCount = isMobile ? 200 : 400;
+        const heartCount = isMobile ? 25 : 50;
+        for (let i = 0; i < particleCount; i++) {
             createRomanticParticle();
         }
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < heartCount; i++) {
             createFloatingHeart();
         }
         createMagicalStars();
+        window.customImages = [];
+        window.createImages();
 
         // Luces románticas
         const ambientLight = new THREE.AmbientLight(0xffe4f0, 0.6);
@@ -624,7 +623,7 @@
             composer.setSize(window.innerWidth, window.innerHeight);
             bloomPass.resolution.set(window.innerWidth, window.innerHeight);
             lensingPass.uniforms.aspectRatio.value = window.innerWidth / window.innerHeight;
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+            renderer.setPixelRatio(isMobile ? 1 : 1.5);
         });
 
         const clock = new THREE.Clock();
@@ -693,117 +692,26 @@
             composer.render(deltaTime);
         }
         animate();
-    </script>
-    <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
-      import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
-      import * as THREE from 'three';
-      // Your web app's Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyDo7xxzDMRJMEOEyhmZiH5Q2lOAgmZYmtk",
-        authDomain: "galaxia-de-amor-cb375.firebaseapp.com",
-        databaseURL: "https://galaxia-de-amor-cb375-default-rtdb.firebaseio.com",
-        projectId: "galaxia-de-amor-cb375",
-        storageBucket: "galaxia-de-amor-cb375.firebasestorage.app",
-        messagingSenderId: "873666572167",
-        appId: "1:873666572167:web:0047a0d273d2757cb8ad22",
-        measurementId: "G-WPWG15Y4D6"
-      };
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const database = getDatabase(app);
 
-      // Elementos DOM
-      const loading = document.getElementById('loading');
-      const progress = document.getElementById('progress');
-      const status = document.getElementById('status');
-
-      // Obtener ID de la URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get('id');
-
-      // Simular progreso de carga
-      let progressValue = 0;
-      const progressInterval = setInterval(() => {
-        progressValue += Math.random() * 10;
-        if (progressValue > 80) progressValue = 80;
-        progress.style.width = progressValue + '%';
-      }, 100);
-
-      // Verificar y cargar datos
-      async function loadData() {
-        let hasData = false;
-        let rawData = [];
-        window.customImages = [];
-        if (id) {
-          try {
-            const snapshot = await get(ref(database, `images/${id}`));
-            if (snapshot.exists()) {
-              rawData = snapshot.val();
-              if (Array.isArray(rawData)) {
-                const textureLoader = new THREE.TextureLoader();
-                const loadPromises = rawData.slice(0, 5).map(base64Data => {
-                  return new Promise((resolve) => {
-                    textureLoader.load(base64Data, resolve, undefined, () => resolve(null));
-                  });
-                });
-                const loadedTextures = await Promise.all(loadPromises);
-                let customTextures = loadedTextures.filter(tex => tex !== null);
-                if (customTextures.length > 0) {
-                  // Duplicar hasta al menos 10
-                  while (customTextures.length < 10) {
-                    customTextures = [...customTextures, ...customTextures];
-                  }
-                  customTextures = customTextures.slice(0, 10);
-                  window.customImages = customTextures;
-                  hasData = true;
-                }
-              }
+        // Simular carga simple sin base de datos
+        const loading = document.getElementById('loading');
+        const progress = document.getElementById('progress');
+        const status = document.getElementById('status');
+        let progressValue = 0;
+        const progressInterval = setInterval(() => {
+            progressValue += Math.random() * 10;
+            if (progressValue > 100) progressValue = 100;
+            progress.style.width = progressValue + '%';
+            if (progressValue >= 100) {
+                clearInterval(progressInterval);
+                loading.classList.add('hidden');
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                }, 500);
+                status.textContent = 'Modo por defecto';
+                status.style.color = '#ff00ff';
             }
-          } catch (error) {
-            console.error('Error loading data:', error);
-          }
-        }
-
-        clearInterval(progressInterval);
-        // Completar progreso
-        const finalInterval = setInterval(() => {
-          progressValue += 5;
-          progress.style.width = progressValue + '%';
-          if (progressValue >= 100) {
-            clearInterval(finalInterval);
-            loading.classList.add('hidden');
-            setTimeout(() => {
-              loading.style.display = 'none';
-            }, 500);
-
-            if (hasData) {
-              status.textContent = 'Datos cargados 💖';
-              status.style.color = '#00ff00';
-              window.createImages();
-
-              // Mostrar panel con las 5 imágenes originales (o menos, repetidas si <5)
-              const panel = document.createElement('div');
-              panel.id = 'imagePanel';
-              document.body.appendChild(panel);
-              rawData.slice(0, 5).forEach(base64 => {
-                const img = document.createElement('img');
-                img.src = base64;
-                panel.appendChild(img);
-              });
-
-            } else {
-              status.textContent = 'Modo por defecto';
-              status.style.color = '#ff00ff';
-            }
-          }
-        }, 50);
-      }
-
-      loadData();
+        }, 100);
     </script>
 </body>
 </html>
