@@ -138,9 +138,9 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 
         // Configuración de la singularidad cyberpunk (fondo)
-        const BLACK_HOLE_RADIUS = 1.3;
+        const BLACK_HOLE_RADIUS = isMobile ? 0.65 : 1.3;
         const DISK_INNER_RADIUS = BLACK_HOLE_RADIUS + 0.2;
-        const DISK_OUTER_RADIUS = 8.0;
+        const DISK_OUTER_RADIUS = isMobile ? 4.0 : 8.0;
         const DISK_TILT_ANGLE = Math.PI / 3.0;
 
         const scene = new THREE.Scene();
@@ -204,7 +204,7 @@
         controls.enableDamping = true; controls.dampingFactor = 0.035;
         controls.rotateSpeed = 0.4; controls.autoRotate = false;
         controls.autoRotateSpeed = 0.1; controls.target.set(0, 0, 0);
-        controls.minDistance = 2.5; controls.maxDistance = 100;
+        controls.minDistance = isMobile ? 1.25 : 2.5; controls.maxDistance = isMobile ? 50 : 100;
         controls.enablePan = false;
         controls.update();
 
@@ -215,7 +215,7 @@
         const starColors = new Float32Array(starCount * 3);
         const starSizes = new Float32Array(starCount);
         const starTwinkle = new Float32Array(starCount);
-        const starFieldRadius = 2000;
+        const starFieldRadius = isMobile ? 1000 : 2000;
         const starPalette = [
             new THREE.Color(0x00ffff), new THREE.Color(0xff00ff),
             new THREE.Color(0x8A2BE2), new THREE.Color(0x00ff7f),
@@ -225,7 +225,7 @@
             const i3 = i * 3;
             const phi = Math.acos(-1 + (2 * i) / starCount);
             const theta = Math.sqrt(starCount * Math.PI) * phi;
-            const radius = Math.cbrt(Math.random()) * starFieldRadius + 100;
+            const radius = Math.cbrt(Math.random()) * starFieldRadius + 50;
             starPositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
             starPositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
             starPositions[i3 + 2] = radius * Math.cos(phi);
@@ -385,7 +385,7 @@
         accretionDisk.renderOrder = 1;
         scene.add(accretionDisk);
 
-        const gridHelper = new THREE.GridHelper(100, 50, 0x00ffff, 0x00ffff);
+        const gridHelper = new THREE.GridHelper(isMobile ? 50 : 100, 50, 0x00ffff, 0x00ffff);
         gridHelper.material.opacity = 0.1;
         gridHelper.material.transparent = true;
         gridHelper.material.blending = THREE.AdditiveBlending;
@@ -466,9 +466,10 @@
                 blending: THREE.AdditiveBlending
             });
             const sprite = new THREE.Sprite(material);
-            sprite.position.x = Math.random() * 120 - 60;
-            sprite.position.y = Math.random() * 100 + 80;
-            sprite.position.z = Math.random() * 120 - 60;
+            const posScale = isMobile ? 0.7 : 1.0;
+            sprite.position.x = (Math.random() * 120 - 60) * posScale;
+            sprite.position.y = (Math.random() * 100 + 80) * posScale;
+            sprite.position.z = (Math.random() * 120 - 60) * posScale;
             const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
             sprite.scale.set(scale, scale, 1);
             sprite.userData = {
@@ -498,9 +499,10 @@
                 blending: THREE.AdditiveBlending
             });
             const sprite = new THREE.Sprite(material);
-            sprite.position.x = Math.random() * 120 - 60;
-            sprite.position.y = Math.random() * 100 + 80;
-            sprite.position.z = Math.random() * 120 - 60;
+            const posScale = isMobile ? 0.7 : 1.0;
+            sprite.position.x = (Math.random() * 120 - 60) * posScale;
+            sprite.position.y = (Math.random() * 100 + 80) * posScale;
+            sprite.position.z = (Math.random() * 120 - 60) * posScale;
             const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
             sprite.scale.set(scale, scale, 1);
             sprite.userData = {
@@ -543,10 +545,11 @@
                 blending: THREE.AdditiveBlending
             });
             const sprite = new THREE.Sprite(material);
+            const posScale = isMobile ? 0.7 : 1.0;
             const angle = Math.random() * Math.PI * 2;
-            const radius = 40 + Math.random() * 20;
+            const radius = (40 + Math.random() * 20) * posScale;
             sprite.position.x = Math.cos(angle) * radius;
-            sprite.position.y = Math.random() * 40 - 20;
+            sprite.position.y = (Math.random() * 40 - 20) * posScale;
             sprite.position.z = Math.sin(angle) * radius;
             const scale = isMobile ? (Math.random() * 4 + 3) : (Math.random() * 8 + 6);
             sprite.scale.set(scale, scale, 1);
@@ -566,11 +569,12 @@
             const geometry = new THREE.BufferGeometry();
             const vertices = [];
             const colors = [];
+            const posScale = isMobile ? 0.7 : 1.0;
             for (let i = 0; i < starCount; i++) {
                 vertices.push(
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250,
-                    Math.random() * 500 - 250
+                    (Math.random() * 500 - 250) * posScale,
+                    (Math.random() * 500 - 250) * posScale,
+                    (Math.random() * 500 - 250) * posScale
                 );
                
                 const color = new THREE.Color();
@@ -606,14 +610,14 @@
         // Luces románticas
         const ambientLight = new THREE.AmbientLight(0xffe4f0, 0.6);
         scene.add(ambientLight);
-        const pointLight1 = new THREE.PointLight(0xff1493, 3, 100);
-        pointLight1.position.set(30, 30, 30);
+        const pointLight1 = new THREE.PointLight(0xff1493, 3, isMobile ? 50 : 100);
+        pointLight1.position.set(isMobile ? 15 : 30, isMobile ? 15 : 30, isMobile ? 15 : 30);
         scene.add(pointLight1);
-        const pointLight2 = new THREE.PointLight(0xda70d6, 3, 100);
-        pointLight2.position.set(-30, 20, -30);
+        const pointLight2 = new THREE.PointLight(0xda70d6, 3, isMobile ? 50 : 100);
+        pointLight2.position.set(isMobile ? -15 : -30, isMobile ? 10 : 20, isMobile ? -15 : -30);
         scene.add(pointLight2);
-        const pointLight3 = new THREE.PointLight(0xffc0cb, 2.5, 80);
-        pointLight3.position.set(0, 40, 20);
+        const pointLight3 = new THREE.PointLight(0xffc0cb, 2.5, isMobile ? 40 : 80);
+        pointLight3.position.set(0, isMobile ? 20 : 40, isMobile ? 10 : 20);
         scene.add(pointLight3);
 
         // Eventos
@@ -654,17 +658,18 @@
             accretionDisk.rotation.z += deltaTime * 0.005;
 
             // Animaciones románticas
+            const posScale = isMobile ? 0.7 : 1.0;
             particles.forEach(particle => {
                 particle.position.y -= particle.userData.velocity;
                 particle.rotation.z += particle.userData.rotationSpeed;
                
                 particle.userData.swing += particle.userData.swingSpeed;
-                particle.position.x += Math.sin(particle.userData.swing) * 0.12;
-                particle.position.z += Math.cos(particle.userData.swing * 0.7) * 0.08;
-                if (particle.position.y < -80) {
-                    particle.position.y = 150;
-                    particle.position.x = Math.random() * 120 - 60;
-                    particle.position.z = Math.random() * 120 - 60;
+                particle.position.x += Math.sin(particle.userData.swing) * 0.12 * posScale;
+                particle.position.z += Math.cos(particle.userData.swing * 0.7) * 0.08 * posScale;
+                if (particle.position.y < -80 * posScale) {
+                    particle.position.y = 150 * posScale;
+                    particle.position.x = (Math.random() * 120 - 60) * posScale;
+                    particle.position.z = (Math.random() * 120 - 60) * posScale;
                 }
             });
             imageParticles.forEach(particle => {
@@ -672,12 +677,12 @@
                 particle.rotation.z += particle.userData.rotationSpeed;
                
                 particle.userData.swing += particle.userData.swingSpeed;
-                particle.position.x += Math.sin(particle.userData.swing) * 0.12;
-                particle.position.z += Math.cos(particle.userData.swing * 0.7) * 0.08;
-                if (particle.position.y < -80) {
-                    particle.position.y = 150;
-                    particle.position.x = Math.random() * 120 - 60;
-                    particle.position.z = Math.random() * 120 - 60;
+                particle.position.x += Math.sin(particle.userData.swing) * 0.12 * posScale;
+                particle.position.z += Math.cos(particle.userData.swing * 0.7) * 0.08 * posScale;
+                if (particle.position.y < -80 * posScale) {
+                    particle.position.y = 150 * posScale;
+                    particle.position.x = (Math.random() * 120 - 60) * posScale;
+                    particle.position.z = (Math.random() * 120 - 60) * posScale;
                 }
             });
             hearts.forEach(heart => {
@@ -686,7 +691,7 @@
                 heart.position.z = Math.sin(heart.userData.angle) * heart.userData.radius;
                
                 heart.userData.floatOffset += heart.userData.floatSpeed;
-                heart.position.y += Math.sin(heart.userData.floatOffset) * 0.15;
+                heart.position.y += Math.sin(heart.userData.floatOffset) * 0.15 * posScale;
                
                 heart.rotation.z = Math.sin(time + heart.userData.floatOffset) * 0.15;
             });
